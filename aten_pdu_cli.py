@@ -5,75 +5,95 @@
 """
 
 import sys
+from dataclasses import dataclass
+from functools import wraps
+
 from telnetlib3.sync import TelnetConnection
 
 
+# Enum()
 OUTLETS = {
     '1':'o01', '2':'o02', '3':'o03', '4':'o04',
     '5':'o05', '6':'o06', '7':'o07', '8':'o08',
 }
 
+PATTERN = (
+    'simple', 'format',
+    'imme', 'delay',
+    'on', 'off'
+)
+
+OPTIONS = ()
+
 
 class ErrorValidArg(Exception):
     """ ... """
 
-class ErrorFlag(Exception):
+
+def validate(func):
     """ ... """
+    @wraps(func)
+    def wrapper(outlet, ret_str):
+        #if outlet in OUTLETS and ret_str in ('simple', 'format'):
+        result = func(outlet, ret_str)
+        return result
+        #raise ErrorValidArg("Error: Invalid arguments !")
+    return wrapper
+
+
+@dataclass(frozen=True)
+class User:
+    """ ... """
+    login: str = 'administrator\r\n'
+    password: str = 'password\r\n'
 
 
 class AtenPDU:
     """ ... """
-    def __init__(self) -> None:
-        self.login: str = 'administrator'
-        self.password: str = 'password'
-        self.host: str = '192.168.0.60'
+    user = User()
+    host = '192.168.0.60'
 
-    def _send_command(self, command: str):
+    @classmethod
+    def _auth(cls, conn):
+        conn.write(cls.user.login)
+        conn.write(cls.user.password)
+
+    @classmethod
+    def _send_command(cls, command):
         """ ... """
-        chars_control_input = '\r\n'
-        with TelnetConnection(host=self.host) as conn:
-            # auth
-            conn.write(self.login + chars_control_input)
-            conn.write(self.password + chars_control_input)
-            conn.write(command + chars_control_input)
+        with TelnetConnection(host=pdu.host) as conn:
+            cls._auth(conn)
+            conn.write(command + '\r\n')
             result = conn.read()
         return result
 
-    def status(self, outlet, ret_str):
+    @staticmethod
+    @validate
+    def status(outlet, ret_str):
         """ ... """
-        if ret_str in ('simple', 'format'):
-            return self._send_command(f"read status {outlet} {ret_str}")
-        raise ErrorFlag("Error: Valid argument, but with the wrong flag !")
+        return AtenPDU._send_command(f"read status {outlet} {ret_str}")
 
-    def power(self, outlet, control, option):
+    @staticmethod
+    @validate
+    def power(outlet, control, option):
         """ ... """
-        if control in ('on', 'off') and option in ('imme', 'delay'):
-            return self._send_command(f"sw {outlet} {control} {option}")
-        raise ErrorFlag("Error: Valid argument, but with the wrong flag !")
+        return AtenPDU._send_command(f"sw {outlet} {control} {option}")
 
-    def reboot(self, outlet):
+    @staticmethod
+    def reboot(outlet):
         """ ... """
-        return self._send_command(f"sw {outlet} reboot")
+        return AtenPDU._send_command(f"sw {outlet} reboot")
 
-
-def validate(pattern):
-    """ ... """
-    if (pattern := pattern.strip()) in ('simple', 'format', 'imme', 'delay', 'on', 'off'):
-        return pattern
-    raise ErrorValidArg("Error: Invalid arguments !")
+    @staticmethod
+    def measure(option):
+        """ ... """
+        return AtenPDU._send_command(f"read meter dev {option} format")
 
 
 try:
     pdu = AtenPDU()
-    print(pdu.status(outlet=OUTLETS['8'], ret_str=validate('simple')))
-    print(pdu.power(outlet=OUTLETS['8'], control=validate('off'), option=validate('imme')))
-    print(pdu.power(outlet=OUTLETS['8'], control=validate('on'), option=validate('delay')))
-except (ErrorValidArg, ErrorFlag) as e:
+
+    print(pdu.status('o08', 'simple'))
+    print(pdu.measure('pow'))
+except ErrorValidArg as e:
     sys.exit(f"{e}")
-
-
-# usage()
-# simply argsparse
-# exceptions
-# unit tests
-# logger
