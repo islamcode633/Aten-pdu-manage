@@ -7,23 +7,20 @@
 import sys
 from dataclasses import dataclass
 from functools import wraps
+#typing
+#logger
 
 from telnetlib3.sync import TelnetConnection
 
 
 # Enum()
-OUTLETS = {
-    '1':'o01', '2':'o02', '3':'o03', '4':'o04',
-    '5':'o05', '6':'o06', '7':'o07', '8':'o08',
-}
+OUTLETS = (
+    'o01', 'o02', 'o03', 'o04',
+    'o05', 'o06', 'o07', 'o08')
 
-PATTERN = (
-    'simple', 'format',
-    'imme', 'delay',
-    'on', 'off'
-)
-
-OPTIONS = ()
+OPTIONS = (
+    'simple', 'format', 'imme', 'delay', 'on', 'off',
+    'curr', 'volt', 'pow', 'pd', 'freq')
 
 
 class ErrorValidArg(Exception):
@@ -33,11 +30,14 @@ class ErrorValidArg(Exception):
 def validate(func):
     """ ... """
     @wraps(func)
-    def wrapper(outlet, ret_str):
-        #if outlet in OUTLETS and ret_str in ('simple', 'format'):
-        result = func(outlet, ret_str)
+    def wrapper(**kwargs):
+        for param, value in kwargs.items():
+            if value in OUTLETS or value in OPTIONS:
+                continue
+            #logger({func.__name__}({param}={value} + docstring))
+            raise ErrorValidArg(f"Error: Invalid arguments !")
+        result = func(**kwargs)
         return result
-        #raise ErrorValidArg("Error: Invalid arguments !")
     return wrapper
 
 
@@ -46,7 +46,6 @@ class User:
     """ ... """
     login: str = 'administrator\r\n'
     password: str = 'password\r\n'
-
 
 class AtenPDU:
     """ ... """
@@ -61,7 +60,7 @@ class AtenPDU:
     @classmethod
     def _send_command(cls, command):
         """ ... """
-        with TelnetConnection(host=pdu.host) as conn:
+        with TelnetConnection(host=cls.host) as conn:
             cls._auth(conn)
             conn.write(command + '\r\n')
             result = conn.read()
@@ -80,11 +79,13 @@ class AtenPDU:
         return AtenPDU._send_command(f"sw {outlet} {control} {option}")
 
     @staticmethod
+    @validate
     def reboot(outlet):
         """ ... """
         return AtenPDU._send_command(f"sw {outlet} reboot")
 
     @staticmethod
+    @validate
     def measure(option):
         """ ... """
         return AtenPDU._send_command(f"read meter dev {option} format")
@@ -93,7 +94,10 @@ class AtenPDU:
 try:
     pdu = AtenPDU()
 
-    print(pdu.status('o08', 'simple'))
-    print(pdu.measure('pow'))
+    print(pdu.status(outlet='o03', ret_str='simple'))
+    print(pdu.power(outlet='o08', control='on', option='imme'))
+    print(pdu.reboot(outlet='o08'))
+    print(pdu.measure(option='curr'))
+
 except ErrorValidArg as e:
     sys.exit(f"{e}")
