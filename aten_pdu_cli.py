@@ -8,6 +8,7 @@ import sys
 from dataclasses import dataclass
 from functools import wraps
 #typing
+from argparse import ArgumentParser
 
 from telnetlib3.sync import TelnetConnection
 
@@ -18,12 +19,16 @@ OUTLETS = (
     'o05', 'o06', 'o07', 'o08')
 
 OPTIONS = (
-    'simple', 'format', 'imme', 'delay', 'on', 'off',
+    'format', 'imme', 'delay', 'on', 'off',
     'curr', 'volt', 'pow', 'pd', 'freq')
 
 
 class ErrorInvalidArg(Exception):
     """ ... """
+
+class ErrorInvalidPositionArg(Exception):
+    """ ... """
+
 
 
 def validate(func):
@@ -66,9 +71,9 @@ class AtenPDU:
 
     @staticmethod
     @validate
-    def status(outlet, ret_str):
+    def status(outlet):
         """ ... """
-        return AtenPDU._send_command(f"read status {outlet} {ret_str}")
+        return AtenPDU._send_command(f"read status {outlet} format")
 
     @staticmethod
     @validate
@@ -89,13 +94,65 @@ class AtenPDU:
         return AtenPDU._send_command(f"read meter dev {option} format")
 
 
-try:
-    pdu = AtenPDU()
-    pdu.status(outlet='o08', ret_str='simple')
-    #print(pdu.status(outlet='o03', ret_str='simple'))
-    #print(pdu.power(outlet='o08', control='on', option='imme'))
-    #print(pdu.reboot(outlet='o08'))
-    #print(pdu.measure(option='curr'))
+def parser():
+    """ ... """
+    parse = ArgumentParser(description='For remote control of the Aten power distribution unit.')
+    parse.add_argument('exec', help='')
+    parse.add_argument('-s', '--status', action='store_true',
+                       help='check the condition of the outlet on/off.\n' \
+                       ' Used with [ --outlet ]')
+    parse.add_argument('-p', '--power', action='store_true',
+                       help='turn the outlet on/off.\n' \
+                       ' Used with [ --outlet, --control, --option ]')
+    parse.add_argument('-r', '--reboot', action='store_true',
+                       help='switch outlet off and then switch outlet on.\n' \
+                       ' Used with [ --outlet ]')
+    parse.add_argument('-m', '--measure', action='store_true',
+                       help='displays power measurement values.\n' \
+                       ' Used with [ --outlet ]')
 
-except ErrorInvalidArg as e:
-    sys.exit(f"Error: Invalid args ! {e}")
+    parse.add_argument('-out', '--outlet', help='outlet number from o01 to o08')
+    parse.add_argument('-c', '--control', help='params on/off')
+    parse.add_argument('-o', '--option',
+                       help='Example:' \
+                       ' imme - switch outlet status immediately,' \
+                       ' curr - read current measurement.' \
+                       ' other options freq/delay etc ...')
+    
+    return parse.parse_args()
+
+
+def dispatchering(pdu, args):
+    """ ... """
+    o = args.outlet
+    if args.status:
+        print(pdu.status(outlet=o))
+    elif args.power:
+        print(pdu.power(outlet=o, control=args.control, option=args.option))
+    elif args.reboot:
+        print(pdu.reboot(outlet=o))
+    elif args.measure:
+        print(pdu.measure(option=args.option))
+    else:
+        #raise ErrorInvalidPositionArg('command not match [ status | power | reboot | measure ]')
+        pass
+
+
+if __name__ == '__main__':
+    try:
+        pdu = AtenPDU()
+        args = parser()
+        dispatchering(pdu=pdu, args=args)
+    #except ErrorInvalidPositionArg as e:
+    #    sys.exit(f"Error: {e}")
+    except ErrorInvalidArg as e:
+        sys.exit(f"Error: Invalid args ! {e}")
+
+
+# print all options
+# unittest dispatch()
+# swap print on write
+# Enum()
+# typing
+# refactor
+# decomposite module
