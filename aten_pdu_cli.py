@@ -8,7 +8,6 @@ import sys
 from dataclasses import dataclass
 from functools import wraps
 #typing
-#logger
 
 from telnetlib3.sync import TelnetConnection
 
@@ -23,7 +22,7 @@ OPTIONS = (
     'curr', 'volt', 'pow', 'pd', 'freq')
 
 
-class ErrorValidArg(Exception):
+class ErrorInvalidArg(Exception):
     """ ... """
 
 
@@ -34,8 +33,7 @@ def validate(func):
         for param, value in kwargs.items():
             if value in OUTLETS or value in OPTIONS:
                 continue
-            #logger({func.__name__}({param}={value} + docstring))
-            raise ErrorValidArg(f"Error: Invalid arguments !")
+            raise ErrorInvalidArg(f"\n {func.__name__}({param}={value})\n '{func.__doc__}'\n")
         result = func(**kwargs)
         return result
     return wrapper
@@ -93,11 +91,11 @@ class AtenPDU:
 
 try:
     pdu = AtenPDU()
+    pdu.status(outlet='o08', ret_str='simple')
+    #print(pdu.status(outlet='o03', ret_str='simple'))
+    #print(pdu.power(outlet='o08', control='on', option='imme'))
+    #print(pdu.reboot(outlet='o08'))
+    #print(pdu.measure(option='curr'))
 
-    print(pdu.status(outlet='o03', ret_str='simple'))
-    print(pdu.power(outlet='o08', control='on', option='imme'))
-    print(pdu.reboot(outlet='o08'))
-    print(pdu.measure(option='curr'))
-
-except ErrorValidArg as e:
-    sys.exit(f"{e}")
+except ErrorInvalidArg as e:
+    sys.exit(f"Error: Invalid args ! {e}")
