@@ -13,7 +13,6 @@ from argparse import ArgumentParser
 from telnetlib3.sync import TelnetConnection
 
 
-# Enum()
 OUTLETS = (
     'o01', 'o02', 'o03', 'o04',
     'o05', 'o06', 'o07', 'o08')
@@ -23,12 +22,11 @@ OPTIONS = (
     'curr', 'volt', 'pow', 'pd', 'freq')
 
 
-class ErrorInvalidArg(Exception):
+class ErrorOptionsNotFound(Exception):
     """ ... """
 
-class ErrorInvalidPositionArg(Exception):
+class ErrorInvalidArgForOption(Exception):
     """ ... """
-
 
 
 def validate(func):
@@ -38,7 +36,7 @@ def validate(func):
         for param, value in kwargs.items():
             if value in OUTLETS or value in OPTIONS:
                 continue
-            raise ErrorInvalidArg(f"\n {func.__name__}({param}={value})\n '{func.__doc__}'\n")
+            raise ErrorInvalidArgForOption(f"Invalid argument [ {value} ] for option [ {param} ]")
         result = func(**kwargs)
         return result
     return wrapper
@@ -50,20 +48,21 @@ class User:
     login: str = 'administrator\r\n'
     password: str = 'password\r\n'
 
+
 class AtenPDU:
     """ ... """
-    user = User()
-    host = '192.168.0.60'
+    _user = User()
+    _host = '192.168.0.60'
 
     @classmethod
     def _auth(cls, conn):
-        conn.write(cls.user.login)
-        conn.write(cls.user.password)
+        conn.write(cls._user.login)
+        conn.write(cls._user.password)
 
     @classmethod
     def _send_command(cls, command):
         """ ... """
-        with TelnetConnection(host=cls.host) as conn:
+        with TelnetConnection(host=cls._host) as conn:
             cls._auth(conn)
             conn.write(command + '\r\n')
             result = conn.read()
@@ -109,50 +108,57 @@ def parser():
                        ' Used with [ --outlet ]')
     parse.add_argument('-m', '--measure', action='store_true',
                        help='displays power measurement values.\n' \
-                       ' Used with [ --outlet ]')
+                       ' Used with [ --option ]')
 
     parse.add_argument('-out', '--outlet', help='outlet number from o01 to o08')
     parse.add_argument('-c', '--control', help='params on/off')
     parse.add_argument('-o', '--option',
-                       help='Example:' \
+                       help='example:' \
                        ' imme - switch outlet status immediately,' \
                        ' curr - read current measurement.' \
                        ' other options freq/delay etc ...')
-    
+    parse.add_argument('--print', action='store_true',
+                       help='print all supported options')
     return parse.parse_args()
-
 
 def dispatchering(pdu, args):
     """ ... """
     o = args.outlet
+    stdout = sys.stdout.write
+
     if args.status:
-        print(pdu.status(outlet=o))
+        stdout(pdu.status(outlet=o) + '\n')
     elif args.power:
-        print(pdu.power(outlet=o, control=args.control, option=args.option))
+        stdout(pdu.power(outlet=o, control=args.control, option=args.option) + '\n')
     elif args.reboot:
-        print(pdu.reboot(outlet=o))
+        stdout(pdu.reboot(outlet=o) + '\n')
     elif args.measure:
-        print(pdu.measure(option=args.option))
+        stdout(pdu.measure(option=args.option) + '\n')
+    elif args.print:
+        stdout(f"{OPTIONS}\n")
     else:
-        #raise ErrorInvalidPositionArg('command not match [ status | power | reboot | measure ]')
-        pass
+        raise ErrorOptionsNotFound('Required option --status|--power|--reboot|--measure|--print')
+
+def main():
+    """ ... """
+    try:
+        err_msg = None
+        dispatchering(pdu=AtenPDU(), args=parser())
+    except (ErrorOptionsNotFound, ErrorInvalidArgForOption) as e:
+        err_msg = e
+    finally:
+        if not err_msg:
+            sys.exit(0)
+        sys.exit(f"error: {err_msg}")
 
 
 if __name__ == '__main__':
-    try:
-        pdu = AtenPDU()
-        args = parser()
-        dispatchering(pdu=pdu, args=args)
-    #except ErrorInvalidPositionArg as e:
-    #    sys.exit(f"Error: {e}")
-    except ErrorInvalidArg as e:
-        sys.exit(f"Error: Invalid args ! {e}")
+    main()
 
 
-# print all options
-# unittest dispatch()
-# swap print on write
-# Enum()
+# handler() input from console for change log, pass, ip
+# mb add parser output data
+# unittest dispatch() handler()
 # typing
 # refactor
 # decomposite module
