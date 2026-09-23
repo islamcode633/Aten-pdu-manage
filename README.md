@@ -1,5 +1,5 @@
 # ATEN PDU Remote Manager
-A simple and efficient Python-based command-line interface (CLI) utility for remotely managing ATEN Power Distribution Units (PDUs) via Telnet. It allows you to check outlet status, control power, reboot outlets, and retrieve energy consumption data.
+A simple and efficient command-line interface (CLI) utility for remotely managing ATEN Power Distribution Units (PDUs) via Telnet. It allows you to check outlet status, control power, reboot outlets, and retrieve energy consumption data.
 
 ## Features
 *   🔍 **Checking status**: a specific outlet is switched on or off.
