@@ -15,16 +15,16 @@ A simple and efficient Python-based command-line interface (CLI) utility for rem
 
 # Using
 * example command:
-    # support options
+    support options
     ./aten_pdu_cli.py --print
 
-    # check work status outlet 8
+    check work status outlet 8
     ./aten_pdu_cli.py [ -s | --status ] -out o08
 
-    # after off immediately on outlet 8
+    after off immediately on outlet 8
     ./aten_pdu_cli.py [ -r | --reboot ] -out o08
 
-    # immediate disconnection of outlet 8
+    immediate disconnection of outlet 8
     ./aten_pdu_cli.py [ -p | --power ] [ -out | --outlet ] o08 [ -c | --control ] off [ -o | --option ] imme
 
 * See ./aten_pdu_cli.py -h for more details.
