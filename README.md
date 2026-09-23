@@ -1,17 +1,17 @@
 # ATEN PDU Remote Manager
-Простая и эффективная CLI-утилита на Python для удаленного управления блоками распределения питания (PDU) производства **ATEN** через протокол Telnet. Позволяет проверять статус розеток, управлять питанием, перезагружать их и снимать показатели электроэнергии.
+A simple and efficient Python-based command-line interface (CLI) utility for remotely managing ATEN Power Distribution Units (PDUs) via Telnet. It allows you to check outlet status, control power, reboot outlets, and retrieve energy consumption data.
 
 ## Features
-*   🔍 **Checking status**: Узнать, включена или выключена конкретная розетка.
-*   ⚡ **Power management**: Дистанционное включение/выключение розеток.
-*   🔄 **Reboot**: Быстрое циклическое выключение и включение для перезагрузки подключенного оборудования.
-*   📊 **Monitoring**: Получение данных о напряжении (Volt), силе тока (Curr), мощности (Pow) и частоте (Freq).
-*   🛠 **Simple interface**: Управление через привычные флаги командной строки.
+*   🔍 **Checking status**: a specific outlet is switched on or off.
+*   ⚡ **Power management**: remote switching of electrical outlets on and off.
+*   🔄 **Reboot**: rapidly cycling power off and on to reboot connected equipment.
+*   📊 **Monitoring**: obtaining data on voltage (Volt), current (Curr), power (Pow), and frequency (Freq).
+*   🛠 **Simple interface**: control via command-line flags.
 
 # Deploy (Debian/Ubuntu)
-sudo apt update && sudo apt install python3-venv git -y
-git clone https://github.com/islamcode633/Aten-pdu-manage.git
-python3 -m venv Aten-pdu-manage && cd Aten-pdu-manage && source bin/activate
+* sudo apt update && sudo apt install python3-venv git -y
+* git clone https://github.com/islamcode633/Aten-pdu-manage.git
+* python3 -m venv Aten-pdu-manage && cd Aten-pdu-manage && source bin/activate
 
 # Using
 See ./aten_pdu_cli.py -h for more details.
