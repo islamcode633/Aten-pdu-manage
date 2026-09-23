@@ -1,19 +1,11 @@
 """
 Сontains the following constants
-    :User: adm user
     :OUTLETS: outlets numbers from 1 to 8
     :OPTIONS: supported options on PDU device
 """
 
+import sys
 import typing
-from dataclasses import dataclass
-
-
-@dataclass(frozen=True)
-class User:
-    """ User with administrator privileges """
-    login: str = 'administrator\r\n'
-    password: str = 'password\r\n'
 
 
 OUTLETS: typing.Final[tuple[str, ...]] = (
@@ -23,3 +15,9 @@ OUTLETS: typing.Final[tuple[str, ...]] = (
 OPTIONS: typing.Final[tuple[str, ...]] = (
     'format', 'imme', 'delay', 'on', 'off',
     'curr', 'volt', 'pow', 'pd', 'freq',)
+
+SUCCESS_CODE: typing.Final[int] = 0
+FAILED_CODE: typing.Final[int] = 1
+
+STDOUT = sys.stdout.write
+EXIT = sys.exit
