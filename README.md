@@ -14,7 +14,7 @@ A simple and efficient Python-based command-line interface (CLI) utility for rem
 * python3 -m venv Aten-pdu-manage && cd Aten-pdu-manage && source bin/activate
 
 # Using
-example command:
+* example command:
     # support options
     ./aten_pdu_cli.py --print
 
