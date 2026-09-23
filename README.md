@@ -15,7 +15,6 @@ A simple and efficient Python-based command-line interface (CLI) utility for rem
 
 # Using
 * example command:
-    support options
     * ./aten_pdu_cli.py --print
 
     check work status outlet 8
