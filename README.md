@@ -11,7 +11,8 @@ A simple and efficient command-line interface (CLI) utility for remotely managin
 # Deploy (Debian/Ubuntu)
 * sudo apt update && sudo apt install python3-venv git -y
 * git clone https://github.com/islamcode633/Aten-pdu-manage.git
-* python3 -m venv Aten-pdu-manage && cd Aten-pdu-manage && source bin/activate
+* python3 -m venv Aten-pdu-manage && cd Aten-pdu-manage
+* source bin/activate && pip3 install telnetlib3
 
 # Using
 * example command:
