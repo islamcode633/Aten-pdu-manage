@@ -14,7 +14,6 @@ A simple and efficient Python-based command-line interface (CLI) utility for rem
 * python3 -m venv Aten-pdu-manage && cd Aten-pdu-manage && source bin/activate
 
 # Using
-See ./aten_pdu_cli.py -h for more details.
 example command:
     # support options
     ./aten_pdu_cli.py --print
@@ -28,5 +27,6 @@ example command:
     # immediate disconnection of outlet 8
     ./aten_pdu_cli.py [ -p | --power ] [ -out | --outlet ] o08 [ -c | --control ] off [ -o | --option ] imme
 
+* See ./aten_pdu_cli.py -h for more details.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
